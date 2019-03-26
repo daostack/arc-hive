@@ -10,6 +10,10 @@ contract DAORegistry is Ownable {
 
     mapping(string=>bool) private registry;
 
+    constructor(address _owner) public {
+        transferOwnership(_owner);
+    }
+
     function propose(address _avatar) public {
         emit Propose(_avatar);
     }
