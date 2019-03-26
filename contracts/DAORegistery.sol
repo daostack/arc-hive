@@ -5,7 +5,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract DAORegistry is Ownable {
 
     event Propose(address indexed _avatar);
-    event Register(address indexed _avatar, string indexed _name);
+    event Register(address indexed _avatar, string _name);
     event UnRegister(address indexed _avatar);
 
     mapping(string=>bool) private registry;
