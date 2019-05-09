@@ -59,6 +59,8 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     function executeProposal(bytes32 _proposalId, int256 _param) external onlyVotingMachine(_proposalId) returns(bool) {
         Avatar avatar = proposalsInfo[msg.sender][_proposalId].avatar;
         DAORegistryProposal memory proposal = organizationsProposals[address(avatar)][_proposalId];
+        delete organizationsProposals[address(avatar)][_proposalId];
+        emit ProposalDeleted(address(avatar), _proposalId);
 
         if (_param == 1) {
             Parameters memory params = parameters[getParametersFromController(avatar)];
@@ -67,13 +69,8 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
             ControllerInterface controller = ControllerInterface(avatar.owner());
             (success, genericCallReturnValue) =
                 controller.genericCall(params.contractToCall, proposal.callData, avatar, proposal.value);
-            if (success) {
-                delete organizationsProposals[address(avatar)][_proposalId];
-                emit ProposalDeleted(address(avatar), _proposalId);
-                emit ProposalExecuted(address(avatar), _proposalId, _param, genericCallReturnValue);
-            } else {
-                require(success, "proposal external call cannot be executed");
-            }
+            require(success, "proposal external call cannot be executed");
+            emit ProposalExecuted(address(avatar), _proposalId, _param, genericCallReturnValue);
         }
 
         return true;
