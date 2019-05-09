@@ -106,7 +106,6 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     * @param _avatar the address of the organization the resource will be registered for
     * @param _registryName the name of the registry to add the resource
     * @param _proposedAvatar the organization we want to add to the registry
-    * @param _callData the abi call to add _proposedAvatar to the registry
     * @param _value value(ETH) to transfer with the call
     * @return a proposal Id
     */
@@ -114,7 +113,6 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         Avatar _avatar,
         string memory _registryName,
         Avatar _proposedAvatar,
-        bytes memory _callData,
         uint256 _value
     ) public returns(bytes32)
     {
@@ -128,11 +126,14 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
             address(_avatar)
         );
 
+        bytes memory callData =
+            abi.encodeWithSignature("register(address, string memory)", address(_proposedAvatar), _registryName);
+
         DAORegistryProposal memory proposal = DAORegistryProposal({
             avatar: address(_proposedAvatar),
             registryName: _registryName,
             addDAO: true,
-            callData: _callData,
+            callData: callData,
             value: _value
         });
 
@@ -157,26 +158,26 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     * @param _avatar the address of the controller from which we want to remove a scheme
     * @param _registryName the name of the registry we want to remove from
     * @param _proposedAvatar the organization we want to remove from the registry
-    * @param _callData the abi encoded call to remove the registry
     * @param _value value(ETH) to transfer with the call
     */
     function proposeToRemoveDAO(
         Avatar _avatar,
         string memory _registryName,
         Avatar _proposedAvatar,
-        bytes memory _callData,
         uint256 _value
     ) public returns(bytes32)
     {
         bytes32 paramsHash = getParametersFromController(_avatar);
         Parameters memory params = parameters[paramsHash];
 
+        bytes memory callData = abi.encodeWithSignature("unRegister(address)", address(_proposedAvatar));
+
         IntVoteInterface intVote = params.intVote;
         bytes32 proposalId = intVote.propose(2, params.voteParams, msg.sender, address(_avatar));
         organizationsProposals[address(_avatar)][proposalId].avatar = address(_avatar);
         organizationsProposals[address(_avatar)][proposalId].registryName = _registryName;
         organizationsProposals[address(_avatar)][proposalId].addDAO = false;
-        organizationsProposals[address(_avatar)][proposalId].callData = _callData;
+        organizationsProposals[address(_avatar)][proposalId].callData = callData;
         organizationsProposals[address(_avatar)][proposalId].value = _value;
 
         emit RemoveDAOProposal(address(_avatar), proposalId, _registryName, address(_proposedAvatar));
