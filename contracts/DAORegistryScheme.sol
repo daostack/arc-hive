@@ -46,7 +46,7 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     struct Parameters {
         bytes32 voteParams;
         IntVoteInterface intVote;
-        address contractToCall;
+        DAORegistry daoRegistry;
     }
 
     mapping(bytes32=>Parameters) public parameters;
@@ -68,7 +68,7 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
             bool success;
             ControllerInterface controller = ControllerInterface(avatar.owner());
             (success, genericCallReturnValue) =
-                controller.genericCall(params.contractToCall, proposal.callData, avatar, proposal.value);
+                controller.genericCall(address(params.daoRegistry), proposal.callData, avatar, proposal.value);
             require(success, "proposal external call cannot be executed");
             emit ProposalExecuted(address(avatar), _proposalId, _param, genericCallReturnValue);
         }
@@ -82,23 +82,23 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     function setParameters(
         bytes32 _voteParams,
         IntVoteInterface _intVote,
-        address _contractToCall
+        DAORegistry _daoRegistry
     ) public returns(bytes32)
     {
-        bytes32 paramsHash = getParametersHash(_voteParams, _intVote, _contractToCall);
+        bytes32 paramsHash = getParametersHash(_voteParams, _intVote, _daoRegistry);
         parameters[paramsHash].voteParams = _voteParams;
         parameters[paramsHash].intVote = _intVote;
-        parameters[paramsHash].contractToCall = _contractToCall;
+        parameters[paramsHash].daoRegistry = _daoRegistry;
         return paramsHash;
     }
 
     function getParametersHash(
         bytes32 _voteParams,
         IntVoteInterface _intVote,
-        address _contractToCall
+        DAORegistry _daoRegistry
     ) public pure returns(bytes32)
     {
-        return keccak256(abi.encodePacked(_voteParams, _intVote, _contractToCall));
+        return keccak256(abi.encodePacked(_voteParams, _intVote, address(_daoRegistry)));
     }
 
     /**
