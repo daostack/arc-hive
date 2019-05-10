@@ -112,11 +112,11 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         uint256 _value
     ) public returns(bytes32)
     {
-        Parameters memory controllerParams = parameters[getParametersFromController(_avatar)];
+        Parameters memory params = parameters[getParametersFromController(_avatar)];
 
-        bytes32 proposalId = controllerParams.intVote.propose(
+        bytes32 proposalId = params.intVote.propose(
             2,
-            controllerParams.voteParams,
+            params.voteParams,
             msg.sender,
             address(_avatar)
         );
@@ -137,7 +137,7 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         );
 
         organizationsProposals[address(_avatar)][proposalId] = proposal;
-        proposalsInfo[address(controllerParams.intVote)][proposalId] = ProposalInfo({
+        proposalsInfo[address(params.intVote)][proposalId] = ProposalInfo({
             blockNumber:block.number,
             avatar:_avatar
         });
@@ -157,13 +157,17 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         uint256 _value
     ) public returns(bytes32)
     {
-        bytes32 paramsHash = getParametersFromController(_avatar);
-        Parameters memory params = parameters[paramsHash];
+        Parameters memory params = parameters[getParametersFromController(_avatar)];
+
+        bytes32 proposalId = params.intVote.propose(
+            2,
+            params.voteParams,
+            msg.sender,
+            address(_avatar)
+        );
 
         bytes memory callData = abi.encodeWithSignature("unRegister(address)", address(_proposedAvatar));
 
-        IntVoteInterface intVote = params.intVote;
-        bytes32 proposalId = intVote.propose(2, params.voteParams, msg.sender, address(_avatar));
         organizationsProposals[address(_avatar)][proposalId].callData = callData;
         organizationsProposals[address(_avatar)][proposalId].value = _value;
 
