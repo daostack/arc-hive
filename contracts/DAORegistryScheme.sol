@@ -16,15 +16,14 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     event NewDAOProposal (
         address indexed _avatar,
         bytes32 indexed _proposalId,
-        string _registryName,
-        address _avatarProposed
+        address _proposedAvatarAddress,
+        string _proposedAvatarName
     );
 
     event RemoveDAOProposal (
         address indexed _avatar,
         bytes32 indexed _proposalId,
-        string _registryName,
-        address _avatarProposed
+        address _proposedAvatarAddress
     );
 
     event ProposalExecuted(address indexed _avatar, bytes32 indexed _proposalId, int256 _param, bytes _returnValue);
@@ -32,9 +31,6 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
 
     // a DAORegistryProposal is a proposal to add or remove a named DAO to/from an organization
     struct DAORegistryProposal {
-        address avatar; //DAO address to be add or removed
-        string registryName; // Name of the DAO that will be the reference key in the registry
-        bool addDAO; // true: approve a DAO, false: unapprove the DAO
         bytes callData; //The abi encode data for the call to registry contracts
         uint256 value;
     }
@@ -102,21 +98,20 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     }
 
     /**
-    * @dev create a proposal to register a DAO with to a named registry
-    * @param _avatar the address of the organization the resource will be registered for
-    * @param _registryName the name of the registry to add the resource
+    * @dev create a proposal to register a DAO in the registry
+    * @param _avatar the address of the organization owning the registry
+    * @param _proposedAvatarName the name of the organization we want to add to the registry
     * @param _proposedAvatar the organization we want to add to the registry
     * @param _value value(ETH) to transfer with the call
     * @return a proposal Id
     */
     function proposeToAddDAO(
         Avatar _avatar,
-        string memory _registryName,
+        string memory _proposedAvatarName,
         Avatar _proposedAvatar,
         uint256 _value
     ) public returns(bytes32)
     {
-        // propose
         Parameters memory controllerParams = parameters[getParametersFromController(_avatar)];
 
         bytes32 proposalId = controllerParams.intVote.propose(
@@ -127,12 +122,9 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         );
 
         bytes memory callData =
-            abi.encodeWithSignature("register(address, string memory)", address(_proposedAvatar), _registryName);
+            abi.encodeWithSignature("register(address, string memory)", address(_proposedAvatar), _proposedAvatarName);
 
         DAORegistryProposal memory proposal = DAORegistryProposal({
-            avatar: address(_proposedAvatar),
-            registryName: _registryName,
-            addDAO: true,
             callData: callData,
             value: _value
         });
@@ -140,8 +132,8 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         emit NewDAOProposal(
             address(_avatar),
             proposalId,
-            _registryName,
-            address(_proposedAvatar)
+            address(_proposedAvatar),
+            _proposedAvatarName
         );
 
         organizationsProposals[address(_avatar)][proposalId] = proposal;
@@ -156,13 +148,11 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     /**
     * @dev propose to remove a DAO inside a named registry
     * @param _avatar the address of the controller from which we want to remove a scheme
-    * @param _registryName the name of the registry we want to remove from
     * @param _proposedAvatar the organization we want to remove from the registry
     * @param _value value(ETH) to transfer with the call
     */
     function proposeToRemoveDAO(
         Avatar _avatar,
-        string memory _registryName,
         Avatar _proposedAvatar,
         uint256 _value
     ) public returns(bytes32)
@@ -174,13 +164,10 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
 
         IntVoteInterface intVote = params.intVote;
         bytes32 proposalId = intVote.propose(2, params.voteParams, msg.sender, address(_avatar));
-        organizationsProposals[address(_avatar)][proposalId].avatar = address(_avatar);
-        organizationsProposals[address(_avatar)][proposalId].registryName = _registryName;
-        organizationsProposals[address(_avatar)][proposalId].addDAO = false;
         organizationsProposals[address(_avatar)][proposalId].callData = callData;
         organizationsProposals[address(_avatar)][proposalId].value = _value;
 
-        emit RemoveDAOProposal(address(_avatar), proposalId, _registryName, address(_proposedAvatar));
+        emit RemoveDAOProposal(address(_avatar), proposalId, address(_proposedAvatar));
         proposalsInfo[address(params.intVote)][proposalId] = ProposalInfo({
             blockNumber: block.number,
             avatar: _avatar
