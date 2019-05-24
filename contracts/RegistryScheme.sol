@@ -26,9 +26,15 @@ contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExec
         address _address
     );
 
-    event ProposalExecuted(address indexed _administrator, bytes32 indexed _proposalId, int256 _voteOutcome, bytes _executionCall);
+    event ProposalExecuted(
+        address indexed _administrator,
+        bytes32 indexed _proposalId,
+        int256 _voteOutcome,
+        bytes _executionCall
+    );
 
-    // A mapping that mapes each administrator to a mapping of proposalsIds to the proposal execution call (ABI encoding)
+    // A mapping that mapes each administrator to a mapping of proposalsIds to
+    // the proposal execution call (ABI encoding)
     mapping(address=>mapping(bytes32=>bytes)) public proposals;
 
     struct Parameters {
@@ -45,7 +51,10 @@ contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExec
      * @param _proposalId the ID of the proposal
      * @param _outcome the outcome of the vote; 1 is yes, all other values are no
      */
-    function executeProposal(bytes32 _proposalId, int256 _outcome) external onlyVotingMachine(_proposalId) returns(bool) {
+    function executeProposal(
+        bytes32 _proposalId,
+        int256 _outcome
+    ) external onlyVotingMachine(_proposalId) returns(bool) {
         Avatar administrator = proposalsInfo[msg.sender][_proposalId].avatar;
         bytes memory executionCall = proposals[address(administrator)][_proposalId];
         // guard against re-entry
