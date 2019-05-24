@@ -7,68 +7,59 @@ import "@daostack/infra/contracts/votingMachines/VotingMachineCallbacksInterface
 import "./DAORegistry.sol";
 
 /**
- * @title A universal scheme for letting organizations manage a registrar of named DAOs
- * @dev The DAORegistryScheme has a registry of DAOs for each organization.
- *      The organizations can through a vote choose to register allowing them to add/remove names inside the registry.
+ * @title A universal scheme for managing a registry of named addresses
+ * @dev The RegistryScheme has a registry of addresses for each DAO.
+ *      A DAO can add and remove names/address mappings inside its registry by voting
  */
-contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExecuteInterface {
+contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExecuteInterface {
 
-    event NewDAOProposal (
-        address indexed _avatar,
+    event ProposeToRegister (
+        address indexed _administrator,
         bytes32 indexed _proposalId,
-        address _proposedAvatarAddress,
-        string _proposedAvatarName
+        address _address,
+        string _name
     );
 
-    event RemoveDAOProposal (
-        address indexed _avatar,
+    event ProposeToUnregister (
+        address indexed _administrator,
         bytes32 indexed _proposalId,
-        address _proposedAvatarAddress
+        address _address
     );
 
-    event ProposalExecuted(address indexed _avatar, bytes32 indexed _proposalId, int256 _param, bytes _returnValue);
-    event ProposalDeleted(address indexed _avatar, bytes32 indexed _proposalId);
+    event ProposalExecuted(address indexed _administrator, bytes32 indexed _proposalId, int256 _voteOutcome, bytes _executionCall);
 
-    // a DAORegistryProposal is a proposal to add or remove a named DAO to/from an organization
-    struct DAORegistryProposal {
-        bytes callData; //The abi encode data for the call to registry contracts
-        uint256 value;
-    }
+    // A mapping that mapes each administrator to a mapping of proposalsIds to the proposal execution call (ABI encoding)
+    mapping(address=>mapping(bytes32=>bytes)) public proposals;
 
-    // A mapping from the organization (Avatar) address to the saved data of the organization:
-    mapping(address=>mapping(bytes32=>DAORegistryProposal)) public organizationsProposals;
-
-    // A mapping from hashes to parameters (use to store a particular configuration on the controller)
     struct Parameters {
         bytes32 voteParams;
         IntVoteInterface intVote;
         DAORegistry daoRegistry;
     }
 
+    // A mapping from hashes to parameters (use to store a particular configuration on the controller)
     mapping(bytes32=>Parameters) public parameters;
 
     /**
      * @dev execution of proposals, can only be called by the voting machine in which the vote is held.
-     * @param _proposalId the ID of the voting in the voting machine
-     * @param _param a parameter of the voting result, 1 yes and 2 is no.
+     * @param _proposalId the ID of the proposal
+     * @param _outcome the outcome of the vote; 1 is yes, all other values are no
      */
-    function executeProposal(bytes32 _proposalId, int256 _param) external onlyVotingMachine(_proposalId) returns(bool) {
-        Avatar avatar = proposalsInfo[msg.sender][_proposalId].avatar;
-        DAORegistryProposal memory proposal = organizationsProposals[address(avatar)][_proposalId];
-        delete organizationsProposals[address(avatar)][_proposalId];
-        emit ProposalDeleted(address(avatar), _proposalId);
+    function executeProposal(bytes32 _proposalId, int256 _outcome) external onlyVotingMachine(_proposalId) returns(bool) {
+        Avatar administrator = proposalsInfo[msg.sender][_proposalId].avatar;
+        bytes memory executionCall = proposals[address(administrator)][_proposalId];
+        // guard against re-entry
+        delete proposals[address(administrator)][_proposalId];
 
-        if (_param == 1) {
-            Parameters memory params = parameters[getParametersFromController(avatar)];
-            bytes memory genericCallReturnValue;
+        if (_outcome == 1) {
+            Parameters memory params = parameters[getParametersFromController(administrator)];
             bool success;
-            ControllerInterface controller = ControllerInterface(avatar.owner());
-            (success, genericCallReturnValue) =
-                controller.genericCall(address(params.daoRegistry), proposal.callData, avatar, proposal.value);
+            ControllerInterface controller = ControllerInterface(administrator.owner());
+            (success,) =
+                controller.genericCall(address(params.daoRegistry), executionCall, administrator, 0);
             require(success, "proposal external call cannot be executed");
-            emit ProposalExecuted(address(avatar), _proposalId, _param, genericCallReturnValue);
         }
-
+        emit ProposalExecuted(address(administrator), _proposalId, _outcome, executionCall);
         return true;
     }
 
@@ -79,13 +70,12 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
         bytes32 _voteParams,
         IntVoteInterface _intVote,
         DAORegistry _daoRegistry
-    ) public returns(bytes32)
+    ) public returns(bytes32 paramsHash)
     {
-        bytes32 paramsHash = getParametersHash(_voteParams, _intVote, _daoRegistry);
+        paramsHash = getParametersHash(_voteParams, _intVote, _daoRegistry);
         parameters[paramsHash].voteParams = _voteParams;
         parameters[paramsHash].intVote = _intVote;
         parameters[paramsHash].daoRegistry = _daoRegistry;
-        return paramsHash;
     }
 
     function getParametersHash(
@@ -98,84 +88,71 @@ contract DAORegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalE
     }
 
     /**
-    * @dev create a proposal to register a DAO in the registry
-    * @param _avatar the address of the organization owning the registry
-    * @param _proposedAvatarName the name of the organization we want to add to the registry
-    * @param _proposedAvatar the organization we want to add to the registry
-    * @param _value value(ETH) to transfer with the call
+    * @dev Propose to register a named address in the registry
+    * @param _administrator the address of the DAO owning the registry
+    * @param _name the name of the address we want to add to the registry
+    * @param _address the address we want to add to the registry
     * @return a proposal Id
     */
     function proposeToAddDAO(
-        Avatar _avatar,
-        string memory _proposedAvatarName,
-        Avatar _proposedAvatar,
-        uint256 _value
-    ) public returns(bytes32)
+        address payable _administrator,
+        string memory _name,
+        address _address
+    ) public returns(bytes32 proposalId)
     {
-        Parameters memory params = parameters[getParametersFromController(_avatar)];
+        Parameters memory params = parameters[getParametersFromController(Avatar(_administrator))];
 
-        bytes32 proposalId = params.intVote.propose(
+        proposalId = params.intVote.propose(
             2,
             params.voteParams,
             msg.sender,
-            address(_avatar)
+            _administrator
         );
 
-        bytes memory callData =
-            abi.encodeWithSignature("register(address, string memory)", address(_proposedAvatar), _proposedAvatarName);
+        bytes memory executionCall =
+            abi.encodeWithSignature("register(address, string memory)", _address, _name);
 
-        DAORegistryProposal memory proposal = DAORegistryProposal({
-            callData: callData,
-            value: _value
-        });
-
-        emit NewDAOProposal(
-            address(_avatar),
+        emit ProposeToRegister(
+            _administrator,
             proposalId,
-            address(_proposedAvatar),
-            _proposedAvatarName
+            _address,
+            _name
         );
 
-        organizationsProposals[address(_avatar)][proposalId] = proposal;
+        proposals[_administrator][proposalId] = executionCall;
         proposalsInfo[address(params.intVote)][proposalId] = ProposalInfo({
             blockNumber:block.number,
-            avatar:_avatar
+            avatar: Avatar(_administrator)
         });
-
-        return proposalId;
     }
 
     /**
-    * @dev propose to remove a DAO inside a named registry
-    * @param _avatar the address of the controller from which we want to remove a scheme
-    * @param _proposedAvatar the organization we want to remove from the registry
-    * @param _value value(ETH) to transfer with the call
+    * @dev Propose to remove a address inside the named registry
+    * @param _administrator the address of the DAO owning the registry
+    * @param _address the address we want to remove from the registry
     */
     function proposeToRemoveDAO(
-        Avatar _avatar,
-        Avatar _proposedAvatar,
-        uint256 _value
-    ) public returns(bytes32)
+        address payable _administrator,
+        address _address
+    ) public returns(bytes32 proposalId)
     {
-        Parameters memory params = parameters[getParametersFromController(_avatar)];
+        Parameters memory params = parameters[getParametersFromController(Avatar(_administrator))];
 
-        bytes32 proposalId = params.intVote.propose(
+        proposalId = params.intVote.propose(
             2,
             params.voteParams,
             msg.sender,
-            address(_avatar)
+            _administrator
         );
 
-        bytes memory callData = abi.encodeWithSignature("unRegister(address)", address(_proposedAvatar));
+        bytes memory executionCall = abi.encodeWithSignature("unRegister(address)", _address);
 
-        organizationsProposals[address(_avatar)][proposalId].callData = callData;
-        organizationsProposals[address(_avatar)][proposalId].value = _value;
+        proposals[_administrator][proposalId] = executionCall;
 
-        emit RemoveDAOProposal(address(_avatar), proposalId, address(_proposedAvatar));
+        emit ProposeToUnregister(_administrator, proposalId, _address);
         proposalsInfo[address(params.intVote)][proposalId] = ProposalInfo({
             blockNumber: block.number,
-            avatar: _avatar
+            avatar: Avatar(_administrator)
         });
-        return proposalId;
     }
 }
