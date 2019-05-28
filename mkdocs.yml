@@ -63,7 +63,7 @@ pages:
     - ExecutableInterface: 'generated_docs/universalSchemes/ExecutableInterface.md'
     - GlobalConstraintRegistrar: 'generated_docs/universalSchemes/GlobalConstraintRegistrar.md'
     - OrganizationRegister: 'generated_docs/universalSchemes/OrganizationRegister.md'
-    - SchemeRegistrar: 'generated_docs/universalSchemes/SchemeRegistrar.md'
+    - DaoRegistryScheme: 'generated_docs/universalSchemes/DaoRegistryScheme.md'
     - SimpleICO: 'generated_docs/universalSchemes/SimpleICO.md'
     - UniversalScheme: 'generated_docs/universalSchemes/UniversalScheme.md'
     - UniversalSchemeInterface: 'generated_docs/universalSchemes/UniversalSchemeInterface.md'

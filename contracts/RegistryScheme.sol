@@ -103,7 +103,7 @@ contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExec
     * @param _address the address we want to add to the registry
     * @return a proposal Id
     */
-    function proposeToAddDAO(
+    function proposeToRegister(
         address payable _administrator,
         string memory _name,
         address _address
@@ -140,7 +140,7 @@ contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExec
     * @param _administrator the address of the DAO owning the registry
     * @param _address the address we want to remove from the registry
     */
-    function proposeToRemoveDAO(
+    function proposeToUnregister(
         address payable _administrator,
         address _address
     ) public returns(bytes32 proposalId)
