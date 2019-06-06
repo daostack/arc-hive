@@ -94,15 +94,38 @@ contract("DaoRegistryScheme", accounts => {
     const { registryScheme, org } = await setup(accounts);
 
     // the registering entity
-    const name = "dOrg";
-    const address = "0xd3e184783ed99df8dc2c48944cd9127088983c22";
+    const nameToRegister = "dOrg";
+    const addressToRegister = "0xd3e184783ed99df8dc2c48944cd9127088983c22";
 
-    var tx = await registryScheme.proposeToRegister(
+    const tx = await registryScheme.proposeToRegister(
       org.avatar.address,
-      name,
-      address
+      nameToRegister,
+      addressToRegister
     );
     assert.equal(tx.logs.length, 1);
     assert.equal(tx.logs[0].event, "ProposeToRegister");
+    const { _administrator, _proposalId, _address , _name} = tx.logs[0].args
+    assert.strictEqual(_administrator.toLowerCase(), org.avatar.address.toLowerCase(), "Expect the _administrator to be the DAO's address")
+    assert.strictEqual(_address.toLowerCase(), addressToRegister.toLowerCase(), "Expect the _address to equal the address provided for registration")
+    assert.strictEqual(_name, nameToRegister, "Expect the _name to equal the name provided for registration")
+    assert.isNotEmpty(_proposalId)
+  });
+
+  it("check that a proposal with that id exists", async function() {
+    const { registryScheme, org } = await setup(accounts);
+
+    // the registering entity
+    const nameToRegister = "dOrg";
+    const addressToRegister = "0xd3e184783ed99df8dc2c48944cd9127088983c22";
+
+    const tx = await registryScheme.proposeToRegister(
+      org.avatar.address,
+      nameToRegister,
+      addressToRegister
+    );
+    const { _proposalId } = tx.logs[0].args
+    const proposal = await registryScheme.proposals.call(org.avatar.address, _proposalId)
+
+    assert.exists(proposal, "There exists a proposal with this id")
   });
 });
