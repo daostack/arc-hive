@@ -28,7 +28,7 @@ const setupRegistrySchemeParams = async (
 };
 
 const setup = async accounts => {
-  const permissions = "0x0000001F";
+  const permissions = "0x00000010";
   const fee = 10;
   const controllerCreator = await ControllerCreator.new({
     gas: constants.ARC_GAS_LIMIT
