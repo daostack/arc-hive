@@ -119,7 +119,7 @@ contract RegistryScheme is UniversalScheme, VotingMachineCallbacks, ProposalExec
         );
 
         bytes memory executionCall =
-            abi.encodeWithSignature("register(address, string memory)", _address, _name);
+            abi.encodeWithSignature("register(address,string)", _address, _name);
 
         emit ProposeToRegister(
             _administrator,
