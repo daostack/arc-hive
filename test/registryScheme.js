@@ -73,7 +73,7 @@ const setup = async accounts => {
   return testSetup;
 };
 
-contract("DaoRegistryScheme", accounts => {
+contract("RegistryScheme", accounts => {
   it("setParameters", async () => {
     const { registryScheme, registrySchemeParams, daoRegistry } = await setup(
       accounts
@@ -104,11 +104,11 @@ contract("DaoRegistryScheme", accounts => {
     );
     assert.equal(tx.logs.length, 1);
     assert.equal(tx.logs[0].event, "ProposeToRegister");
-    const { _administrator, _proposalId, _address, _name } = tx.logs[0].args;
+    const { _avatar, _proposalId, _address, _name } = tx.logs[0].args;
     assert.strictEqual(
-      _administrator.toLowerCase(),
+      _avatar.toLowerCase(),
       org.avatar.address.toLowerCase(),
-      "Expect the _administrator to be the DAO's address"
+      "Expect the _avatar to be the DAO's address"
     );
     assert.strictEqual(
       _address.toLowerCase(),
@@ -155,11 +155,11 @@ contract("DaoRegistryScheme", accounts => {
     );
     assert.equal(tx.logs.length, 1);
     assert.equal(tx.logs[0].event, "ProposeToUnregister");
-    const { _administrator, _proposalId, _address } = tx.logs[0].args;
+    const { _avatar, _proposalId, _address } = tx.logs[0].args;
     assert.strictEqual(
-      _administrator.toLowerCase(),
+      _avatar.toLowerCase(),
       org.avatar.address.toLowerCase(),
-      "Expect the _administrator to be the DAO's address"
+      "Expect the _avatar to be the DAO's address"
     );
     assert.strictEqual(
       _address.toLowerCase(),
@@ -194,7 +194,7 @@ contract("DaoRegistryScheme", accounts => {
       addressToRegister
     );
     const { _proposalId } = tx.logs[0].args;
-    assert.isFalse(await daoRegistry.isRegister("dOrg"));
+    assert.isFalse(await daoRegistry.isRegistered("dOrg"));
     const vote = 1; // vote yes
     const amount = 0; // no payment
     const voter = helpers.NULL_ADDRESS; // not used, voting as myself
@@ -205,7 +205,7 @@ contract("DaoRegistryScheme", accounts => {
       voter,
       { from: accounts[2] }
     );
-    assert.isTrue(await daoRegistry.isRegister("dOrg"));
+    assert.isTrue(await daoRegistry.isRegistered("dOrg"));
   });
 
   it("propose to register and execute registration, then propose to unregister and execute unregistration", async function() {
@@ -239,7 +239,7 @@ contract("DaoRegistryScheme", accounts => {
     );
 
     assert.isTrue(
-      await daoRegistry.isRegister("dOrg"),
+      await daoRegistry.isRegistered("dOrg"),
       "dOrg should be registered"
     );
 

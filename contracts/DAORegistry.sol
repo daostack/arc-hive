@@ -4,7 +4,6 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract DAORegistry is Ownable {
 
-    event Propose(address indexed _avatar);
     event Register(address indexed _avatar, string _name);
     event UnRegister(address indexed _avatar);
 
@@ -12,10 +11,6 @@ contract DAORegistry is Ownable {
 
     constructor(address _owner) public {
         transferOwnership(_owner);
-    }
-
-    function propose(address _avatar) public {
-        emit Propose(_avatar);
     }
 
     function register(address _avatar, string memory _name) public onlyOwner {
@@ -29,7 +24,7 @@ contract DAORegistry is Ownable {
     }
 
     //This getter is needed because Dynamically-sized keys for public mappings are not supported.
-    function isRegister(string memory _name) public view returns(bool) {
+    function isRegistered(string memory _name) public view returns(bool) {
         return registry[_name];
     }
 

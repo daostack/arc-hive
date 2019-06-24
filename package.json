@@ -23,31 +23,6 @@
     "truffle": "truffle",
     "build": "rimraf build && truffle compile"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "babel-eslint": "^10.0.1",
-    "babel-plugin-syntax-async-functions": "^6.13.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-register": "^6.26.0",
-    "cross-conf-env": "^1.1.2",
-    "default-options": "^1.0.0",
-    "eslint": "^4.19.1",
-    "eslint-config-defaults": "^9.0.0",
-    "eslint-config-standard": "^11.0.0-beta.0",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-react": "^7.6.1",
-    "eslint-plugin-standard": "^3.0.1",
-    "pm2": "^2.9.3",
-    "promisify": "^0.0.3",
-    "pug": "^2.0.0-rc.4",
-    "rimraf": "^2.6.2",
-    "run-with-ganache": "^0.1.1",
-    "solhint": "^1.5.1",
-    "truffle": "5.0.4"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/daostack/arc.git"
@@ -76,5 +51,30 @@
   },
   "peerDependencies": {
     "ganache-cli": "^6.4.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "cross-conf-env": "^1.1.2",
+    "default-options": "^1.0.0",
+    "eslint": "^4.19.1",
+    "eslint-config-defaults": "^9.0.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-react": "^7.6.1",
+    "eslint-plugin-standard": "^3.0.1",
+    "pm2": "^2.9.3",
+    "promisify": "^0.0.3",
+    "pug": "^2.0.0-rc.4",
+    "rimraf": "^2.6.2",
+    "run-with-ganache": "^0.1.1",
+    "solhint": "^1.5.1",
+    "truffle": "5.0.4"
   }
 }
