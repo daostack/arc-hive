@@ -7,14 +7,6 @@ function assertVMException(error) {
     assert.isTrue(condition, 'Expected a VM Exception, got this instead:' + error.message);
 }
 contract('DAORegistry', accounts => {
-    it("propose", async () => {
-      var daoRegistry = await DAORegistry.new(accounts[0]);
-      var tx = await daoRegistry.propose(accounts[0]);
-      assert.equal(tx.logs.length, 1);
-      assert.equal(tx.logs[0].event, "Propose");
-      assert.equal(tx.logs[0].args._avatar,accounts[0]);
-
-    });
 
     it("register", async () => {
       var daoRegistry = await DAORegistry.new(accounts[0]);
@@ -22,7 +14,7 @@ contract('DAORegistry', accounts => {
       assert.equal(tx.logs.length, 1);
       assert.equal(tx.logs[0].event, "Register");
       assert.equal(tx.logs[0].args._avatar,accounts[0]);
-      assert.equal(await daoRegistry.isRegister("test"),true);
+      assert.equal(await daoRegistry.isRegistered("test"),true);
       try {
           await daoRegistry.register(accounts[0],"test");
           assert(false, 'dao with the same name already registered');
@@ -59,6 +51,6 @@ contract('DAORegistry', accounts => {
       assert.equal(tx.logs.length, 1);
       assert.equal(tx.logs[0].event, "UnRegister");
       assert.equal(tx.logs[0].args._avatar,accounts[0]);
-      assert.equal(await daoRegistry.isRegister("test"),true);
+      assert.equal(await daoRegistry.isRegistered("test"),true);
     });
 });

@@ -23,6 +23,35 @@
     "truffle": "truffle",
     "build": "rimraf build && truffle compile"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daostack/arc.git"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts",
+    "security",
+    "daostack",
+    "arc"
+  ],
+  "engines": {
+    "node": ">=10.15.1"
+  },
+  "author": "DAOstack (https://www.daostack.io)",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/daostack/arc-hive/issues"
+  },
+  "homepage": "https://daostack.io",
+  "dependencies": {
+    "@daostack/arc": "0.0.1-rc.18",
+    "openzeppelin-solidity": "2.2.0"
+  },
+  "peerDependencies": {
+    "ganache-cli": "^6.4.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "babel-eslint": "^10.0.1",
@@ -47,33 +76,5 @@
     "run-with-ganache": "^0.1.1",
     "solhint": "^1.5.1",
     "truffle": "5.0.4"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/daostack/arc.git"
-  },
-  "keywords": [
-    "solidity",
-    "ethereum",
-    "smart",
-    "contracts",
-    "security",
-    "daostack",
-    "arc"
-  ],
-  "engines": {
-    "node": ">=10.15.1"
-  },
-  "author": "DAOstack (https://www.daostack.io)",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/daostack/arc-hive/issues"
-  },
-  "homepage": "https://daostack.io",
-  "dependencies": {
-    "openzeppelin-solidity": "2.2.0"
-  },
-  "peerDependencies": {
-    "ganache-cli": "^6.4.0"
   }
 }
