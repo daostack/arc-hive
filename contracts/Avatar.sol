@@ -40,6 +40,10 @@ contract Avatar is Ownable, Initializable  {
       orgName = _orgName;
     }
 
+    function getId() public pure returns(uint256) {
+      return 1;
+    }
+
     /**
     * @dev enables an avatar to receive ethers
     */

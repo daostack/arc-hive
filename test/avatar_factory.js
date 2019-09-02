@@ -28,7 +28,6 @@ contract('AvatarFactory', accounts => {
       await packageC.addVersion([0,1,0],implementationDirectory.address,NULL_HASH);
       await app.setPackage(packageName,packageC.address,[0,1,0]);
       var providerAddress = await app.getProvider(packageName);
-      console.log(providerAddress,avatar.address);
 
       // Construct the call data for the initialize method of Avatar.sol.
       // This call data consists of the contract's `initialize` method with the value of `genesis`.
@@ -50,7 +49,6 @@ contract('AvatarFactory', accounts => {
       var adminUpgradeabilityProxy  = await  AdminUpgradeabilityProxy.at(avatarProxy1);
 
 
-    //  console.log("impInstance1",await adminUpgradeabilityProxy.implementation());
 
       // Retrieve the value stored in the instance contract.
       // Note that we cannot make the call using the same address that created the proxy
@@ -58,18 +56,19 @@ contract('AvatarFactory', accounts => {
       assert.equal("genesis",await impInstance1.orgName({from:accounts[1]}));
       assert.equal("genesis2",await impInstance2.orgName({from:accounts[1]}));
       var avatar2 = await Avatar2.new();
-      console.log("avatarProxy1", avatar2.address);
       var proxyAdmin = await ProxyAdmin.new();
       //AdminUpgradeabilityProxy proxy, address implementation, bytes memory data
-      data = await new web3.eth.Contract(avatar2.abi).methods.initialize().encodeABI();
+    //data = await new web3.eth.Contract(avatar2.abi).methods.initialize().encodeABI();
+      assert.equal(await adminUpgradeabilityProxy.implementation.call(),avatar.address);
+    //  var impInstance3 = await Avatar2.at(avatarProxy1);
+      assert.equal(1,await impInstance1.getId({from:accounts[1]}));
+      await adminUpgradeabilityProxy.upgradeTo(avatar2.address,{from:accounts[0]});
+      assert.equal(await adminUpgradeabilityProxy.implementation.call(),avatar2.address);
 
-      await adminUpgradeabilityProxy.upgradeToAndCall(avatar2.address,data,{from:accounts[0]});
-
-      var impInstance3 = await Avatar2.at(avatarProxy1);
       //data = await new web3.eth.Contract(avatar2.abi).methods.initialize().encodeABI();
       //tx = await app.create(packageName,contractName,admin,data);
       //await impInstance3.initialize({from:accounts[1]});
-      assert.equal("upgraded",await impInstance3.orgName({from:accounts[1]}));
+      assert.equal(2,await impInstance1.getId({from:accounts[1]}));
       //assert.equal(true,false);
 
     });

@@ -40,6 +40,10 @@ contract Avatar2 is Ownable, Initializable  {
       orgName = "upgraded";
     }
 
+    function getId() public pure returns(uint256) {
+      return 2;
+    }
+
     /**
     * @dev enables an avatar to receive ethers
     */
