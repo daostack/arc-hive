@@ -1,0 +1,11 @@
+{
+  "manifestVersion": "2.2",
+  "contracts": {
+    "Factory": "Factory",
+    "Instance": "Instance"
+  },
+  "dependencies": {},
+  "name": "creating-instances-from-solidity",
+  "version": "0.1.0",
+  "publish": true
+}

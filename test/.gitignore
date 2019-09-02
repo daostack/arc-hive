@@ -8,5 +8,3 @@ node_modules/
 .vscode/
 site/
 yarn*
-
-.openzeppelin/.session
