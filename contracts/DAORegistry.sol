@@ -1,18 +1,15 @@
 pragma solidity ^0.5.4;
 
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 
-contract DAORegistry is Ownable {
+contract DAORegistry is Initializable, Ownable {
 
     event Propose(address indexed _avatar);
     event Register(address indexed _avatar, string _name);
     event UnRegister(address indexed _avatar);
 
     mapping(string=>bool) private registry;
-
-    constructor(address _owner) public {
-        transferOwnership(_owner);
-    }
 
     function propose(address _avatar) public {
         emit Propose(_avatar);
