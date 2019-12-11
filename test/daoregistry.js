@@ -7,6 +7,13 @@ function assertVMException(error) {
     assert.isTrue(condition, 'Expected a VM Exception, got this instead:' + error.message);
 }
 contract('DAORegistry', accounts => {
+    it("check owner", async () => {
+      var daoRegistry = await DAORegistry.new();
+      await daoRegistry.initialize(accounts[0]);
+      var owner = await daoRegistry.owner();
+      assert.equal(owner, accounts[0]);
+    });
+
     it("propose", async () => {
       var daoRegistry = await DAORegistry.new();
       await daoRegistry.initialize(accounts[0]);
