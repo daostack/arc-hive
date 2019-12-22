@@ -71,6 +71,8 @@
   },
   "homepage": "https://daostack.io",
   "dependencies": {
+    "@openzeppelin/contracts-ethereum-package": "2.3.0",
+    "@openzeppelin/upgrades": "2.5.3",
     "openzeppelin-solidity": "2.2.0"
   },
   "peerDependencies": {
