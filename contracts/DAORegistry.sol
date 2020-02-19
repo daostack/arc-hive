@@ -6,7 +6,7 @@ contract DAORegistry is Ownable {
 
     event Propose(address indexed _avatar);
     event Register(address indexed _avatar, string _name);
-    event UnRegister(address indexed _avatar);
+    event UnRegister(address indexed _avatar, string _name);
 
     mapping(string=>bool) private registry;
 
@@ -20,8 +20,10 @@ contract DAORegistry is Ownable {
         emit Register(_avatar, _name);
     }
 
-    function unRegister(address _avatar) public onlyOwner {
-        emit UnRegister(_avatar);
+    function unRegister(address _avatar, string memory _name) public onlyOwner {
+        require(registry[_name]);
+        registry[_name] = false;
+        emit UnRegister(_avatar, _name);
     }
 
     //This getter is needed because Dynamically-sized keys for public mappings are not supported.

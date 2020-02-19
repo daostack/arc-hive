@@ -1,6 +1,6 @@
 {
   "name": "@daostack/arc-hive",
-  "version": "0.0.1-rc.5",
+  "version": "0.0.1-rc.6",
   "description": "A dao's registry",
   "files": [
     "contracts/",
