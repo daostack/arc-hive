@@ -56,21 +56,23 @@ contract('DAORegistry', accounts => {
       await daoRegistry.initialize(accounts[1]);
       await daoRegistry.register(accounts[0],"test",{from:accounts[1]});
       try {
-          await daoRegistry.unRegister(accounts[0]);
+          await daoRegistry.unRegister(accounts[0],"test");
           assert(false, 'wrong owner');
-        } catch (ex) {
-          assertVMException(ex);
-        }
+      } catch (ex) {
+        assertVMException(ex);
+      }
+      assert.equal(await daoRegistry.isRegister("test"),true);
     });
 
     it("unRegister", async () => {
       var daoRegistry = await DAORegistry.new();
       await daoRegistry.initialize(accounts[0]);
       await daoRegistry.register(accounts[0],"test");
-      var tx = await daoRegistry.unRegister(accounts[0]);
+      var tx = await daoRegistry.unRegister(accounts[0],"test");
       assert.equal(tx.logs.length, 1);
       assert.equal(tx.logs[0].event, "UnRegister");
       assert.equal(tx.logs[0].args._avatar,accounts[0]);
-      assert.equal(await daoRegistry.isRegister("test"),true);
+      assert.equal(tx.logs[0].args._name,"test");
+      assert.equal(await daoRegistry.isRegister("test"),false);
     });
 });
